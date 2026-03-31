@@ -26,7 +26,7 @@ public static class RestaurantGenerator
         {
             Name = restNames[Random.Range(0, restNames.Length)],
             Cuisines = cuisines,
-            Price = Random.Range(10, 201),
+            Price = Random.Range(1, 11) * 10,
             NoiseLevel = Random.Range(1, 4),
             Distance = Random.Range(1, 51),
             Rating = Random.Range(1, 6)

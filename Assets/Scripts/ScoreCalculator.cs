@@ -27,7 +27,7 @@ public static class ScoreCalculator
         // Multiplier calculation
         // Hunger level times amount of seconds saved from twenty second time countdown. 
         // Example: (20 - 6) + 1 = 15
-        int secondsSaved = 20 - Mathf.FloorToInt(timeTaken);
+        int secondsSaved = 30 - Mathf.FloorToInt(timeTaken);
         
         // Ensure multiplier doesn't break if timeout
         if (secondsSaved < 0) secondsSaved = 0;

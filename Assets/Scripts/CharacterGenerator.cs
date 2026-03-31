@@ -13,7 +13,7 @@ public static class CharacterGenerator
         {
             Name = firstNames[Random.Range(0, firstNames.Length)],
             CuisinePreference = (CuisineType)Random.Range(0, 6),
-            PricePreference = Random.Range(10, 201),   // 10 to 200
+            PricePreference = Random.Range(1, 11) * 10,   // 10 to 100 in multiples of 10
             NoisePreference = Random.Range(1, 4),      // 1 to 3
             DistancePreference = Random.Range(1, 51),  // 1 to 50
             RatingPreference = Random.Range(1, 6),     // 1 to 5

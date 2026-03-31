@@ -9,14 +9,15 @@ public class GameManager : MonoBehaviour
     public List<Restaurant> restaurantPool = new List<Restaurant>();
     public int totalScore = 0;
     public int currentRound = 1;
+    public int lastRoundScore = -1;
 
     [Header("Round State")]
     public List<Restaurant> currentRoundOptions = new List<Restaurant>();
     public int currentRestaurantIndex = 0;
-    private float currentRestaurantViewTime;
     
     // Timer state
     private bool isWaitingForInput = false;
+    private float roundStartTime;
 
     [Header("UI References")]
     [Tooltip("The Layout Group to spawn character cards into (e.g., Horizontal Layout Group at the bottom)")]
@@ -43,8 +44,8 @@ public class GameManager : MonoBehaviour
     {
         if (isWaitingForInput)
         {
-            float timeTaken = Time.time - currentRestaurantViewTime;
-            float secondsLeft = 20f - timeTaken;
+            float timeTaken = Time.time - roundStartTime;
+            float secondsLeft = 30f - timeTaken;
 
             if (secondsLeft < 0f) secondsLeft = 0f;
 
@@ -77,6 +78,7 @@ public class GameManager : MonoBehaviour
 
     void StartRound()
     {
+        roundStartTime = Time.time;
         int numRestaurants = 9 + currentRound;
         currentRoundOptions.Clear();
         
@@ -108,7 +110,6 @@ public class GameManager : MonoBehaviour
         }
 
         Restaurant currentRest = currentRoundOptions[currentRestaurantIndex];
-        currentRestaurantViewTime = Time.time;
         isWaitingForInput = true;
         
         // Visual Update
@@ -161,7 +162,7 @@ public class GameManager : MonoBehaviour
         if (!isWaitingForInput) return;
         
         Restaurant selectedRest = currentRoundOptions[currentRestaurantIndex];
-        float timeTaken = Time.time - currentRestaurantViewTime;
+        float timeTaken = Time.time - roundStartTime;
         
         int pointsGained = 0;
         foreach (var character in activeCharacters)
@@ -169,8 +170,17 @@ public class GameManager : MonoBehaviour
             pointsGained += ScoreCalculator.CalculateScore(character, selectedRest, timeTaken);
         }
 
-        totalScore += pointsGained;
         isWaitingForInput = false;
+
+        // Condition: score gained must be higher than last round score
+        if (currentRound > 1 && pointsGained <= lastRoundScore)
+        {
+            TriggerGameOver($"GAME OVER! You scored {pointsGained} this round, which wasn't higher than your last round's score of {lastRoundScore}.");
+            return;
+        }
+
+        lastRoundScore = pointsGained;
+        totalScore += pointsGained;
 
         UpdateScoreUI();
 
