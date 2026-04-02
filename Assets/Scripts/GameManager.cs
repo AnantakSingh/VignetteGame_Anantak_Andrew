@@ -165,31 +165,47 @@ public class GameManager : MonoBehaviour
         float timeTaken = Time.time - roundStartTime;
         
         int pointsGained = 0;
-        foreach (var character in activeCharacters)
+        int unsatisfiedCount = 0;
+
+        CharacterCardUI[] cardUIs = playersContainer.GetComponentsInChildren<CharacterCardUI>();
+
+        for (int i = 0; i < activeCharacters.Count; i++)
         {
-            pointsGained += ScoreCalculator.CalculateScore(character, selectedRest, timeTaken);
+            int unmultipliedScore;
+            int charScore = ScoreCalculator.CalculateScore(activeCharacters[i], selectedRest, timeTaken, out unmultipliedScore);
+            pointsGained += charScore;
+
+            if (unmultipliedScore <= 10)
+            {
+                unsatisfiedCount++;
+            }
+
+            if (i < cardUIs.Length)
+            {
+                cardUIs[i].FlashColor(unmultipliedScore > 10 ? Color.green : Color.red);
+                cardUIs[i].UpdateMouthMood(unmultipliedScore <= 10);
+            }
         }
 
         isWaitingForInput = false;
-
-        // Condition: score gained must be higher than last round score
-        if (currentRound > 1 && pointsGained <= lastRoundScore)
-        {
-            TriggerGameOver($"GAME OVER! You scored {pointsGained} this round, which wasn't higher than your last round's score of {lastRoundScore}.");
-            return;
-        }
 
         lastRoundScore = pointsGained;
         totalScore += pointsGained;
 
         UpdateScoreUI();
 
-        if (totalScore < 0)
+        if (unsatisfiedCount > activeCharacters.Count / 2)
         {
-            TriggerGameOver("Game Over! Score dropped below 0.");
+            TriggerGameOver($"GAME OVER! More than half the party was unsatisfied (Score 0 or less).");
             return;
         }
 
+        StartCoroutine(EndRoundRoutine());
+    }
+
+    private System.Collections.IEnumerator EndRoundRoutine()
+    {
+        yield return new WaitForSeconds(1.0f);
         EndRound();
     }
     
@@ -209,10 +225,10 @@ public class GameManager : MonoBehaviour
         if (activeCharacters.Contains(c))
         {
             activeCharacters.Remove(c);
-            totalScore = 0; 
+            totalScore /= 2; 
             UpdatePlayerUI();
             UpdateScoreUI();
-            Debug.Log($"Kicked character {c.Name}. Score reset to 0!");
+            Debug.Log($"Kicked character {c.Name}. Score halved to {totalScore}!");
         }
     }
 

@@ -3,8 +3,12 @@ using UnityEngine;
 public static class CharacterGenerator
 {
     private static string[] firstNames = { 
-        "Dave", "Stella", "Alice", "Bob", "Charlie", "Diana", 
-        "Eve", "Frank", "Gina", "Harry", "Irene", "Jack" 
+        "Cole Slawson", "Manny Nara", "Alfredo DeLuca", "Marco Pollo", "Chai Mehta", 
+        "Bao Nguyen", "Roman Noodle", "Perry Macaron", "Soyun Lee", "Brie Carter", 
+        "Angus Steele", "Curina Patel", "Kim Chi Park", "Nacho Rivera", "Pastina Rossi", 
+        "Zac Saffron", "Hana Bulgari", "Annie Mae", "Grill Nye", "Talia Verde", 
+        "Woklyn Chen", "Ginger Zhang", "Rosemary Babi", "Ron Swanson", "Patty Krabb", 
+        "Ben Delacreme", "Brandy Shine", "Coco Beignet", "Tessa Tart", "Caramel Swinton"
     };
 
     public static Character GenerateRandomCharacter()
@@ -17,7 +21,11 @@ public static class CharacterGenerator
             NoisePreference = Random.Range(1, 4),      // 1 to 3
             DistancePreference = Random.Range(1, 51),  // 1 to 50
             RatingPreference = Random.Range(1, 6),     // 1 to 5
-            HungerLevel = Random.Range(1, 4)           // 1 to 3
+            HungerLevel = Random.Range(1, 4),          // 1 to 3
+            FaceID = Random.Range(0, 1000),
+            EyesID = Random.Range(0, 1000),
+            HairID = Random.Range(0, 1000),
+            IsSad = false
         };
     }
 }

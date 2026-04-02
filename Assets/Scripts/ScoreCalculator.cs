@@ -2,7 +2,7 @@ using UnityEngine;
 
 public static class ScoreCalculator
 {
-    public static int CalculateScore(Character character, Restaurant restaurant, float timeTaken)
+    public static int CalculateScore(Character character, Restaurant restaurant, float timeTaken, out int unmultipliedScore)
     {
         int baseScore = 0;
 
@@ -10,15 +10,19 @@ public static class ScoreCalculator
         if (restaurant.Cuisines.Contains(character.CuisinePreference))
             baseScore += 10;
 
-        // Price: subtract restaurant parameter from character parameter
-        baseScore += (character.PricePreference - restaurant.Price);
+        // Price: subtract restaurant parameter from character parameter, 
+        // normalize to a scale of 10 by treating difference as fraction of total range (100)
+        float priceDiff = character.PricePreference - restaurant.Price;
+        baseScore += Mathf.RoundToInt((priceDiff / 100f) * 10f);
 
         // Noise/Crowd level: if the parameter matches, add 10 points
         if (character.NoisePreference == restaurant.NoiseLevel)
             baseScore += 10;
 
-        // Distance: subtract restaurant parameter from character parameter
-        baseScore += (character.DistancePreference - restaurant.Distance);
+        // Distance: subtract restaurant parameter from character parameter,
+        // normalize to a scale of 10 by treating difference as fraction of total range (50)
+        float distanceDiff = character.DistancePreference - restaurant.Distance;
+        baseScore += Mathf.RoundToInt((distanceDiff / 50f) * 10f);
 
         // Rating: if the parameter matches add 10 points
         if (character.RatingPreference == restaurant.Rating)
@@ -34,6 +38,7 @@ public static class ScoreCalculator
         
         int multiplier = secondsSaved + character.HungerLevel;
 
+        unmultipliedScore = baseScore;
         return baseScore * multiplier;
     }
 }

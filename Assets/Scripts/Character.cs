@@ -21,4 +21,10 @@ public class Character
     public int DistancePreference;  // 1 to 50
     public int RatingPreference;    // 1 to 5
     public int HungerLevel;         // 1 to 3 (Low, Medium, High)
+
+    // Avatar configuration
+    public int FaceID;
+    public int EyesID;
+    public int HairID;
+    public bool IsSad;
 }
