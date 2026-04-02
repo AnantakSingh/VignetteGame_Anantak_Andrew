@@ -18,8 +18,24 @@ public class GameManager : MonoBehaviour
     // Timer state
     private bool isWaitingForInput = false;
     private float roundStartTime;
+    private bool hasKickedThisRound = false;
+
+    [Header("Audio")]
+    [Tooltip("The audio source used to play sound effects")]
+    public AudioSource sfxSource;
+    public AudioClip selectSound;
+    public AudioClip passSound;
+    public AudioClip kickSound;
+    public AudioClip gameOverSound;
 
     [Header("UI References")]
+    [Tooltip("The custom Game Over screen container")]
+    public GameObject gameOverScreen;
+    public TextMeshProUGUI finalAuraText;
+
+    [Tooltip("Any extra UI objects you want to hide when the game is over")]
+    public GameObject[] extraObjectsToDisable;
+
     [Tooltip("The Layout Group to spawn character cards into (e.g., Horizontal Layout Group at the bottom)")]
     public Transform playersContainer;
     
@@ -32,7 +48,7 @@ public class GameManager : MonoBehaviour
     [Tooltip("Text displaying the remaining time (20 to 0)")]
     public TextMeshProUGUI timerText; 
     
-    [Tooltip("Text displaying the current global score and round")]
+    [Tooltip("Text displaying the current global aura and round")]
     public TextMeshProUGUI scoreText;
 
     void Start()
@@ -47,7 +63,12 @@ public class GameManager : MonoBehaviour
             float timeTaken = Time.time - roundStartTime;
             float secondsLeft = 30f - timeTaken;
 
-            if (secondsLeft < 0f) secondsLeft = 0f;
+            if (secondsLeft <= 0f) 
+            {
+                secondsLeft = 0f;
+                TriggerGameOver("GAME OVER! You ran out of time.");
+                return;
+            }
 
             if (timerText != null)
             {
@@ -79,6 +100,7 @@ public class GameManager : MonoBehaviour
     void StartRound()
     {
         roundStartTime = Time.time;
+        hasKickedThisRound = false;
         int numRestaurants = 9 + currentRound;
         currentRoundOptions.Clear();
         
@@ -146,13 +168,17 @@ public class GameManager : MonoBehaviour
     {
         if (scoreText != null)
         {
-            scoreText.text = $"Score: {totalScore} | Round: {currentRound}";
+            scoreText.text = $"Aura: {totalScore} | Round: {currentRound}";
         }
     }
 
     public void OnPassButtonClicked()
     {
         if (!isWaitingForInput) return;
+        
+        if (sfxSource != null && passSound != null) 
+            sfxSource.PlayOneShot(passSound);
+            
         currentRestaurantIndex++;
         ShowCurrentRestaurant();
     }
@@ -161,6 +187,9 @@ public class GameManager : MonoBehaviour
     {
         if (!isWaitingForInput) return;
         
+        if (sfxSource != null && selectSound != null) 
+            sfxSource.PlayOneShot(selectSound);
+            
         Restaurant selectedRest = currentRoundOptions[currentRestaurantIndex];
         float timeTaken = Time.time - roundStartTime;
         
@@ -196,7 +225,7 @@ public class GameManager : MonoBehaviour
 
         if (unsatisfiedCount > activeCharacters.Count / 2)
         {
-            TriggerGameOver($"GAME OVER! More than half the party was unsatisfied (Score 0 or less).");
+            TriggerGameOver($"GAME OVER! More than half the party was unsatisfied (Aura 0 or less).");
             return;
         }
 
@@ -222,13 +251,20 @@ public class GameManager : MonoBehaviour
 
     public void KickCharacter(Character c)
     {
+        if (hasKickedThisRound) return;
+        if (totalScore < 100) return;
+
         if (activeCharacters.Contains(c))
         {
+            if (sfxSource != null && kickSound != null) 
+                sfxSource.PlayOneShot(kickSound);
+
+            hasKickedThisRound = true;
             activeCharacters.Remove(c);
             totalScore /= 2; 
             UpdatePlayerUI();
             UpdateScoreUI();
-            Debug.Log($"Kicked character {c.Name}. Score halved to {totalScore}!");
+            Debug.Log($"Kicked character {c.Name}. Aura halved to {totalScore}!");
         }
     }
 
@@ -241,7 +277,7 @@ public class GameManager : MonoBehaviour
             totalScore /= 2;
             UpdatePlayerUI();
             UpdateScoreUI();
-            Debug.Log($"Replaced character {c.Name}. Score halved to {totalScore}!");
+            Debug.Log($"Replaced character {c.Name}. Aura halved to {totalScore}!");
         }
     }
 
@@ -250,10 +286,31 @@ public class GameManager : MonoBehaviour
         Debug.Log(message);
         isWaitingForInput = false;
         
-        if (scoreText != null)
+        if (sfxSource != null && gameOverSound != null) 
+            sfxSource.PlayOneShot(gameOverSound);
+            
+        // Disable Gameplay UI
+        if (playersContainer != null) playersContainer.gameObject.SetActive(false);
+        if (restaurantCardUI != null) restaurantCardUI.gameObject.SetActive(false);
+        if (timerText != null) timerText.gameObject.SetActive(false);
+        if (scoreText != null) scoreText.gameObject.SetActive(false);
+
+        if (extraObjectsToDisable != null)
         {
-            scoreText.text = $"GAME OVER! Final Score: {totalScore}";
-            scoreText.color = Color.red;
+            foreach (GameObject obj in extraObjectsToDisable)
+            {
+                if (obj != null) obj.SetActive(false);
+            }
+        }
+
+        // Turn on Game Over Screen
+        if (gameOverScreen != null)
+        {
+            gameOverScreen.SetActive(true);
+            if (finalAuraText != null)
+            {
+                finalAuraText.text = $"Final Aura: {totalScore}";
+            }
         }
     }
 }

@@ -45,10 +45,10 @@ public class CharacterCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         if (priceText != null) priceText.text = $"Price: ${character.PricePreference}";
         
         string noiseLabel = character.NoisePreference == 1 ? "Low" : character.NoisePreference == 2 ? "Med" : "High";
-        if (noiseText != null) noiseText.text = $"Noise Pref: {noiseLabel}";
+        if (noiseText != null) noiseText.text = $"Noise: {noiseLabel}";
         
         if (distanceText != null) distanceText.text = $"Distance: {character.DistancePreference} mins";
-        if (ratingText != null) ratingText.text = $"Rating Pref: {character.RatingPreference} Stars";
+        if (ratingText != null) ratingText.text = $"Rating: {character.RatingPreference} Stars";
         
         string hungerLabel = character.HungerLevel == 1 ? "Low" : character.HungerLevel == 2 ? "Med" : "High";
         if (hungerText != null) hungerText.text = $"Hunger: {hungerLabel}";
